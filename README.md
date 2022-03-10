@@ -1,10 +1,11 @@
 # [Título del trabajo]
 
-[Descripción breve del proyecto a realizar (2-3 frases).]
+Vamos a crea un  software que permita detectar la temperatura y almacenar los valores de esta. 
 
 ## Integrantes del equipo
 
-[Nombres, apellidos, y usuario GitHub de los integrantes del equipo.]
+Carlos Martínez Marcos
+Adrián  Paona  
 
 ## Objetivos del trabajo
 
