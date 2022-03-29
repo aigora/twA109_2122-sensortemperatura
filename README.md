@@ -5,7 +5,7 @@ Sensor de temperatura.
 ## Integrantes del equipo
 
 Carlos Martínez Marcos
-Adrián  Paona
+Adrián  Paino
 Víctor Malumbres Muñoz
 
 ## Objetivos del trabajo
