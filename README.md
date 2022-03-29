@@ -16,7 +16,7 @@ Vamos a crear un software que permita detectar la temperatura y almacenar los va
 ## Identificacion de materiales
 ESP32
 <br />sensor 
-ventilador
-led
+<br />ventilador
+<br />led
 
 
