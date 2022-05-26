@@ -45,7 +45,7 @@ void verifica_sensores(Serial* Arduino, char* port)
 }
 
 float leer_sensor_temperatura(Serial*);
-float leer_sensor_temperatura(Serial*)
+float leer_sensor_temperatura(Serial* Arduino)
 {
 	float temperatura[];
 	int i;
