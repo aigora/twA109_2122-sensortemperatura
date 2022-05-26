@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <locale.h>
+#include <conio.h>
 #include "SerialClass.h"
 #include "SerialClass.cpp"
 #include <string.h>
