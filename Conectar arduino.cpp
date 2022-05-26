@@ -7,6 +7,7 @@
 
 #define MAX_BUFFER 200
 #define PAUSA_MS 200
+#define N 200
 
 int menu(void);
 int menu(void)
@@ -18,7 +19,6 @@ int menu(void)
 	printf("\n\t1 - Verificar sensores de temperatura");
 	printf("\n\t2 - Monitorizar sensores de TEMPERATURA");
 	printf("\n\t3 - Visualizar registro de temperatura");
-	printf("\n\t4 - Activar ventiladores\n");
 	
 	printf("\n\t0 - Cerrar el programa");
 	
@@ -47,7 +47,8 @@ void verifica_sensores(Serial* Arduino, char* port)
 float leer_sensor_temperatura(Serial*);
 float leer_sensor_temperatura(Serial*)
 {
-	float temperatura;
+	float temperatura[];
+	int i;
 	int bytesRecibidos;
 	char mensaje_recibido[MAX_BUFFER];
 
@@ -56,14 +57,15 @@ float leer_sensor_temperatura(Serial*)
 	if (bytesRecibidos <= 0)
 		temperatura = -1;
 	else
-		temperatura = float_from_cadena(mensaje_recibido);
-	return temperatura;
+		for (i=0; i<N; i++)
+			temperatura[i] = float_from_cadena(mensaje_recibido);
+	return temperatura[];
 }
 
 void monitorizar_sensor_temperatura(Serial*);
 void monitorizar_sensor_temperatura(Serial* Arduino)
 {
-	float frecuencia, temperatura;
+	float frecuencia, temperatura[];
 	char tecla;
 	do
 	{
@@ -97,43 +99,42 @@ float float_from_cadena(char* cadena)
 	float numero = 0;
 	int i, divisor = 10, estado = 0;
 
-
-	for (i = 0; cadena[i] != '\0' && estado != 3 && i < MAX_BUFFER; i++)
-		switch (estado)
-		{
-		case 0:
-			if (cadena[i] >= '0' && cadena[i] <= '9')
+	for (i=0; i<N; i++)
+	{
+		for (i = 0; cadena[i] != '\0' && estado != 3 && i < MAX_BUFFER; i++)
+			switch (estado)
 			{
-				numero = cadena[i] - '0';
-				estado = 1;
-			}
-			break;
-		case 1:
-			if (cadena[i] >= '0' && cadena[i] <= '9')
-				numero = numero * 10 + cadena[i] - '0';
-			else
-				if (cadena[i] == '.' || cadena[i] == ',')
-					estado = 2;
+			case 0:
+				if (cadena[i] >= '0' && cadena[i] <= '9')
+				{
+					numero = cadena[i] - '0';
+					estado = 1;
+				}
+				break;
+			case 1:
+				if (cadena[i] >= '0' && cadena[i] <= '9')
+					numero = numero * 10 + cadena[i] - '0';
+				else
+					if (cadena[i] == '.' || cadena[i] == ',')
+						estado = 2;
+					else
+						estado = 3;
+				break;
+			case 2: 
+				if (cadena[i] >= '0' && cadena[i] <= '9')
+				{
+					numero = numero + (float)(cadena[i] - '0') / divisor;
+					divisor *= 10;
+				}
 				else
 					estado = 3;
-			break;
-		case 2: 
-			if (cadena[i] >= '0' && cadena[i] <= '9')
-			{
-				numero = numero + (float)(cadena[i] - '0') / divisor;
-				divisor *= 10;
+				break;
 			}
-			else
-				estado = 3;
-			break;
-		}
+	}			
 	return numero;
 }
 
-//void visualizar_registro_temperatura(Serial*);
 
-
-//void activar_ventilador(Serial* Arduino);
 
 int Enviar_y_Recibir(Serial*, const char*, char*);
 int Enviar_y_Recibir(Serial* Arduino, const char* mensaje_enviar, char* mensaje_recibir)
@@ -168,15 +169,82 @@ int Enviar_y_Recibir(Serial* Arduino, const char* mensaje_enviar, char* mensaje_
 
 
 
+void leer_fichero_temperaturas(Serial*, int*, int);
+void leer_fichero_temperaturas(Serial* p[], int* pnumero, int longitud)
+{
+		FILE* fichero; // Puntero para manipular el fichero
+	int num = 0; // Variable auxiliar para numero de usuarios le�dos
+	int i, pos; // Variable bucle y posicion final cadena
+	errno_t cod_error; // Código de error tras el proceso de apertura.
+	char intro[2];
+
+	cod_error = fopen_s(&fichero, "Temperatura.txt", "rt"); // Se intenta abrir el fichero de texto
+	if (cod_error != 0)  // Si el fichero no se ha podido abrir
+		*pnumero = 0; // La lista estará vacía
+	else  // Si el fichero ha podido abrirse 
+	{
+		fscanf_s(fichero, "%d", &num); // Se lee la cantidad de registros
+		if (num == 0) // Si esa cantidad es cero
+			*pnumero = 0; // La lista estar� vac�a
+		else  // Si hay registros para leer (según el entero leído)
+		{
+			if (num > longitud) // Si no hay memoria suficiente
+			{
+				printf("Memoria insuficiente para almacenar los datos del fichero\n");
+				*pnumero = 0;
+			}
+			else // Si hay memoria suficiente
+			{
+				fgets(intro, 2, fichero); // Saltamos el intro que hay tras el número (Ascii 10 y 13)
+				for (i = 0;i < num;i++)  // Se leen los registros uno por uno
+				{
+					fgets((p + i)->temperatura, fichero);
+					pos = strlen((p + i)->temperatura);  // Calcula la longitud del nombre para ubicar el \n.
+					(p + i)->temperatura[pos - 1] = '\0';
+				}
+				*pnumero = num;
+			}
+		}
+		fclose(fichero); // Se cierra el fichero
+	}
+}
+
+int escribir_fichero_temperaturas(Serial*, int);
+int escribir_fichero_temperaturas(Serial* lista, int numero)
+{
+	int i;
+	FILE* fichero;
+	errno_t err;
+
+	err = fopen_s(&fichero, "Temperatura.txt", "w");
+	if (err == 0) // Si el fichero se ha podido crear
+	{
+		fprintf(fichero, "%d\n", numero); // Se graba en el fichero el número de usuarios
+		for (i = 0;i < numero;i++)
+		{
+
+			fprintf(fichero, "%s\n", (lista + i)->temperatura;
+		}
+		fclose(fichero);
+	}
+	else
+		printf("Se ha producido un problema a la hora de grabar el fichero de usuarios\n");
+	return err;
+}
+
+
 int main(void)
 {
 	Serial* Arduino;
 	char puerto[] = "COM6"; // Puerto serie al que está conectado Arduino
 	int opcion_menu;
-
+	float temperatura[];
 
 	setlocale(LC_ALL, "es-ES");
 	Arduino = new Serial((char*)puerto);
+	temperatura = leer_sensor_temperatura(Serial*);
+	temperatura = malloc(sizeof(float)*N);
+	
 	do
 	
 	{
@@ -194,18 +262,14 @@ int main(void)
  				printf("Mostrando datos:\n");
  				visualizar_registro_temperatura(Arduino);
  			break;
- 			case 4:
- 				printf("Mostrando datos:\n");
- 				activar_ventilador(Arduino);
- 			break;
  			case 0:
  				printf("Fin del programa.");
  			break;
  			default: printf("\nOpción incorrecta\n");			
  		}
- 	} while (opcion_menu != 5);	
+ 	} while (opcion_menu != 4);	
 
-	while (opcion_menu<1 || opcion_menu>4)
+	while (opcion_menu<1 || opcion_menu>3)
 	{
 		printf("Introduzca una opción válida:")
 		scanf("%d", &opcion_menu);
@@ -213,3 +277,4 @@ int main(void)
 	
 	return 0;
 }
+
