@@ -272,7 +272,7 @@ int main(void)
 
 	while (opcion_menu<1 || opcion_menu>3)
 	{
-		printf("Introduzca una opción válida:")
+		printf("Introduzca una opción válida:");
 		scanf("%d", &opcion_menu);
 	}
 	
