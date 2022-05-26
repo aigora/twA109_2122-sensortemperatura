@@ -261,7 +261,7 @@ int main(void)
 				monitorizar_sensor_temperatura(Arduino);
  			case 3:
  				printf("Mostrando datos:\n");
- 				visualizar_registro_temperatura(Arduino);
+ 				leer_fichero_temperaturas(Arduino);
  			break;
  			case 0:
  				printf("Fin del programa.");
