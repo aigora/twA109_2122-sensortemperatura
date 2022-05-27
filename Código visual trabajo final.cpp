@@ -28,42 +28,11 @@ int menu(void)
 }
 
 void verifica_sensores(Serial*, char*);
-void verifica_sensores(Serial* Arduino, char* port)
-{
-	float temperatura;
 
-	if (Arduino->IsConnected())
-	{
-		temperatura = leer_sensor_temperatura(Arduino);
-		if (temperatura != -1)
-			printf("\nTemperatura: %f\n", temperatura);
-	}
-	else
-	{
-		printf("\nNo se ha podido conectar con Arduino.\n");
-		printf("Revise la conexión, el puerto %s y desactive el monitor serie del IDE de Arduino.\n", port);
-	}
-}
 
 
 float leer_sensor_temperatura(Serial*);
-float leer_sensor_temperatura(Serial* Arduino)
-{
-	float temperatura;
-	int bytesRecibidos;
-	char mensaje_recibido[MAX_BUFFER];
 
-	bytesRecibidos = Enviar_y_Recibir(Arduino, "GET_TEMPERATURA\n", mensaje_recibido);
-
-	
-		if (bytesRecibidos <= 0)
-			temperatura = -1;
-		else
-			
-				temperatura = float_from_cadena(mensaje_recibido);
-
-	return temperatura;
-}
 
 void monitorizar_sensor_temperatura(Serial*);
 void monitorizar_sensor_temperatura(Serial* Arduino)
@@ -266,8 +235,43 @@ int main(void)
 	while (opcion_menu < 1 || opcion_menu>3)
 	{
 		printf("Introduzca una opción válida:");
-		scanf("%d", &opcion_menu);
+		scanf_s("%d", &opcion_menu);
 	}
 
 	return 0;
+}
+
+float leer_sensor_temperatura(Serial* Arduino)
+{
+	float temperatura;
+	int bytesRecibidos;
+	char mensaje_recibido[MAX_BUFFER];
+
+	bytesRecibidos = Enviar_y_Recibir(Arduino, "GET_TEMPERATURA\n", mensaje_recibido);
+
+
+	if (bytesRecibidos <= 0)
+		temperatura = -1;
+	else
+
+		temperatura = float_from_cadena(mensaje_recibido);
+
+	return temperatura;
+}
+
+void verifica_sensores(Serial* Arduino, char* port)
+{
+	float temperatura;
+
+	if (Arduino->IsConnected())
+	{
+		temperatura = leer_sensor_temperatura(Arduino);
+		if (temperatura != -1)
+			printf("\nTemperatura: %f\n", temperatura);
+	}
+	else
+	{
+		printf("\nNo se ha podido conectar con Arduino.\n");
+		printf("Revise la conexión, el puerto %s y desactive el monitor serie del IDE de Arduino.\n", port);
+	}
 }
