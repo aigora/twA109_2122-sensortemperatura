@@ -1,4 +1,4 @@
-# [sensortemperatura]
+# [Galaxian]
 
 Sensor de temperatura.
 
